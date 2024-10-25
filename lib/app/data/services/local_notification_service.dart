@@ -161,7 +161,7 @@ class LocalNotificationService {
       {Duration? duration}) async {
     return await flutterLocalNotificationsPlugin.zonedSchedule(
       alarmDetails.id!,
-      alarmDetails.label == '' ? 'Alarm is ringing' : alarmDetails.label,
+      alarmDetails.label.isEmpty ? 'Alarm is ringing' : alarmDetails.label,
       alarmDetails.alarmDateTime.formatDateTime(formate: 'hh:mm a'),
       alarmDetails.alarmDateTime.isAfter(DateTime.now())
           ? tz.TZDateTime.from(alarmDetails.alarmDateTime, tz.local)
