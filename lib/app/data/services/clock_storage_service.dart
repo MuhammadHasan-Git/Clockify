@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:Clockify/app/data/models/clock_model.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ClockStorageService {
@@ -8,27 +9,27 @@ class ClockStorageService {
     return File('${directory.path}/clock.json');
   }
 
-  static Future<void> saveClockCard(String timeZoneLocation) async {
+  static Future<void> saveClockCard(ClockModel clockModel) async {
     final file = await localFilePath;
-    List<String> existingClock = await loadClockCards();
-    existingClock.add(timeZoneLocation);
-    final alarmsJson = existingClock.cast<String>();
-    await file.writeAsString(jsonEncode(alarmsJson));
+    final List<ClockModel> existingClock = await loadClockCards();
+    existingClock.add(clockModel);
+    final clocksJson = jsonEncode(existingClock);
+    await file.writeAsString(clocksJson);
   }
 
-  static deleteAlarm(List<bool> selectedAlarms) async {
+  static Future<void> deleteClockCard(List<bool> selectedCard) async {
     final file = await localFilePath;
-    List<String> existingClock = await loadClockCards();
-    for (var i = 0; i < selectedAlarms.length;) {
-      existingClock.removeWhere(
-        (element) => selectedAlarms[i++],
-      );
+    final List<ClockModel> existingClock = await loadClockCards();
+    for (int i = selectedCard.length - 1; i >= 0; i--) {
+      if (selectedCard[i]) {
+        existingClock.removeAt(i);
+      }
     }
-    final alarmsJson = existingClock.cast<String>();
-    await file.writeAsString(jsonEncode(alarmsJson));
+    final clockJson = jsonEncode(existingClock);
+    await file.writeAsString(clockJson);
   }
 
-  static Future<List<String>> loadClockCards() async {
+  static Future<List<ClockModel>> loadClockCards() async {
     try {
       final file = await localFilePath;
       if (!await file.exists()) {
@@ -39,11 +40,11 @@ class ClockStorageService {
       if (data.isEmpty) {
         return [];
       }
-      final List<dynamic> alarmsJson = jsonDecode(data);
-      List<String> timeZones = alarmsJson.map((json) {
-        return json as String;
-      }).toList();
-      return timeZones;
+      final List<dynamic> clockModelsJson = jsonDecode(data);
+      List<ClockModel> clockModels = clockModelsJson
+          .map((clockModelJson) => ClockModel.fromJson(clockModelJson))
+          .toList();
+      return clockModels;
     } catch (e) {
       return [];
     }

@@ -58,7 +58,7 @@ class AlarmController extends GetxController {
     selectedAlarms.value = List.filled(alarms.length, false);
   }
 
-  void selectionHandler() {
+  void markAsAllSelected() {
     if (selectedAlarms.contains(false)) {
       selectedAlarms.value = List.filled(alarms.length, true);
     } else {

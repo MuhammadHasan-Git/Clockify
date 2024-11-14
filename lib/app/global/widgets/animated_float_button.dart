@@ -1,21 +1,19 @@
-import 'dart:developer';
-
-import 'package:Clockify/app/global/controller/time_picker_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Clockify/app/core/utils/constants/enums/float_button_type.dart';
 import 'package:Clockify/app/data/models/lap_model.dart';
 import 'package:Clockify/app/modules/stopwatch/controller/stopwatch_controller.dart';
 
-class FloatButtonTwo extends StatelessWidget {
+class AnimatedFloatButton extends StatelessWidget {
   final RxBool isRunning;
   final RxBool isPause;
   final FloatButtonType floatButtonType;
-  const FloatButtonTwo(
-      {super.key,
-      required this.isRunning,
-      required this.isPause,
-      required this.floatButtonType});
+  const AnimatedFloatButton({
+    super.key,
+    required this.isRunning,
+    required this.isPause,
+    required this.floatButtonType,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -89,11 +87,6 @@ class FloatButtonTwo extends StatelessWidget {
                       stopwatchCtrl.handleStartStop();
                       break;
                     case FloatButtonType.timer:
-                      final timePickerCtrl =
-                          Get.find<TimePickerController>(tag: 'timer');
-                      log(timePickerCtrl
-                          .getSelectedTime(isTimer: true)
-                          .toIso8601String());
                       break;
                     default:
                   }

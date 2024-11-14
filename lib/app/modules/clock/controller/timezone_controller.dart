@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
-import 'package:timezone/timezone.dart';
 import 'package:Clockify/app/core/utils/constants/timezones.dart';
-import 'package:Clockify/app/data/services/clock_storage_service.dart';
 import 'package:Clockify/app/modules/clock/controller/clock_controller.dart';
 import 'package:timezone/timezone.dart' as tz;
 
@@ -32,14 +29,6 @@ class TimezoneController extends GetxController {
     return formattedOffset;
   }
 
-  String getCurrentTimeInTimeZone(String timeZone) {
-    var now = DateTime.now().toUtc();
-    var location = getLocation(timeZone);
-    var tzTime = TZDateTime.from(now, location);
-    var formatter = DateFormat('yyyy-MM-dd HH:mm:ss').addPattern("zzz");
-    return formatter.format(tzTime);
-  }
-
   void loadMoreTimezones() {
     if (scrollController.position.pixels >=
             scrollController.position.maxScrollExtent -
@@ -62,12 +51,6 @@ class TimezoneController extends GetxController {
       },
     ).toList();
     update();
-  }
-
-  void addClockCard(String timeZoneLocation) async {
-    await ClockStorageService.saveClockCard(timeZoneLocation);
-    clockCtrl.loadClock();
-    Get.back();
   }
 
   @override
