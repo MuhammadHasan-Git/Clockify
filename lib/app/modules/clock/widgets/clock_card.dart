@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:developer';
 import 'package:Clockify/app/core/utils/extensions/extensions.dart';
 import 'package:Clockify/app/data/models/clock_model.dart';
+import 'package:animated_analog_clock/animated_analog_clock.dart';
 import 'package:flutter/material.dart';
 import 'package:Clockify/app/core/utils/constants/colors.dart';
-import 'package:Clockify/app/modules/clock/widgets/zone_clock.dart';
 
 class ClockCard extends StatefulWidget {
   final ClockModel clockModel;
@@ -32,12 +32,13 @@ class ClockCard extends StatefulWidget {
   State<ClockCard> createState() => _ClockCardState();
 }
 
-class _ClockCardState extends State<ClockCard> {
+class _ClockCardState extends State<ClockCard>
+    with AutomaticKeepAliveClientMixin {
   bool isDisposed = false;
   Timer? _timer;
+  final DateTime now = DateTime.now();
   @override
   void initState() {
-    final DateTime now = DateTime.now();
     final Duration initialDelay =
         Duration(seconds: 60 - now.second, milliseconds: -now.millisecond);
     Future.delayed(
@@ -64,6 +65,7 @@ class _ClockCardState extends State<ClockCard> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return GestureDetector(
       onTap: widget.onTap,
       onLongPress: widget.onLongPress,
@@ -158,23 +160,28 @@ class _ClockCardState extends State<ClockCard> {
                 onChanged: (value) => widget.onToggleCheckbox(),
               )
             else
-              ZoneClock(
-                currentTime: widget.clockModel.locationDateTime,
-                clockSize: 45,
+              AnimatedAnalogClock(
+                location: widget.clockModel.location,
+                size: 45,
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 hourHandColor: Theme.of(context).colorScheme.secondary,
                 minuteHandColor: Theme.of(context).colorScheme.secondary,
                 secondHandColor: Theme.of(context).colorScheme.secondary,
+                showSecondHand: false,
                 hourDashColor: Colors.transparent,
                 minuteDashColor: Colors.transparent,
                 centerDotColor: Theme.of(context).colorScheme.secondary,
                 extendMinuteHand: true,
                 extendHourHand: true,
                 extendSecondHand: true,
+                updateInterval: const Duration(minutes: 1),
               )
           ],
         ),
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

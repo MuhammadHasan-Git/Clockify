@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:Clockify/app/core/utils/constants/timezones.dart';
-import 'package:Clockify/app/modules/clock/controller/clock_controller.dart';
 import 'package:timezone/timezone.dart' as tz;
+import 'package:Clockify/app/modules/clock/controller/clock_controller.dart';
 
 class TimezoneController extends GetxController {
   final int pageSize = 40;
-  List<String> timezones = locations;
+  final Map<String, tz.Location> locations = tz.timeZoneDatabase.locations;
+  late List<String> timezones;
   List<String> visibleTimezones = [];
   List<String>? searchedList;
   final searchController = TextEditingController();
@@ -55,6 +55,7 @@ class TimezoneController extends GetxController {
 
   @override
   void onInit() {
+    timezones = locations.keys.map((key) => locations[key]!.name).toList();
     timezones.sort((a, b) => a
         .split('/')
         .last
