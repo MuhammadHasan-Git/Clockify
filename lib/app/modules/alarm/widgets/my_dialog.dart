@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:Clockify/app/core/utils/constants/colors.dart';
-import 'package:Clockify/app/modules/add_alarm/controller/add_alarm_controller.dart';
-import 'package:Clockify/app/modules/add_alarm/widget/my_button.dart';
+import 'package:Clockify/app/modules/alarm/controller/add_alarm_controller.dart';
+import 'package:Clockify/app/global/widgets/my_button.dart';
 
 class MyDialog extends StatelessWidget {
   const MyDialog({super.key});
@@ -23,9 +23,7 @@ class MyDialog extends StatelessWidget {
               'Add alarm label',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
             TextFormField(
               cursorColor: darkBlue,
               controller: addAlarmCtrl.labelController,
@@ -55,26 +53,23 @@ class MyDialog extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(
-              height: 30,
-            ),
+            const SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 MyButton(
-                  text: 'Cancle',
+                  text: 'Cancel',
                   foregroundColor: Theme.of(context).colorScheme.primary,
                   onPressed: () => addAlarmCtrl.onCloseDialog(),
                 ),
                 SizedBox(width: 10.w),
                 MyButton(
-                    text: 'Set',
-                    foregroundColor: white,
-                    backgroundColor: darkBlue,
-                    onPressed: () {
-                      addAlarmCtrl.saveLabel(addAlarmCtrl.labelController.text);
-                      Get.back();
-                    }),
+                  text: 'Set',
+                  foregroundColor: white,
+                  backgroundColor: darkBlue,
+                  onPressed: () =>
+                      addAlarmCtrl.saveLabel(addAlarmCtrl.labelController.text),
+                ),
               ],
             )
           ],

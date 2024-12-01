@@ -12,11 +12,18 @@ class RingtoneController extends GetxController {
     AlarmRingtone(name: 'Walk In The Forest', path: 'walk_in_the_forest'),
     AlarmRingtone(name: 'Good Morning', path: 'good_morning'),
   ];
+
   final RxInt selectedRingtoneIndex = 0.obs;
   late AudioPlayer player;
 
   void playSound(String path) async {
     await player.play(AssetSource('audio/$path.mp3'));
+  }
+
+  void onSelectSound(int index) {
+    selectedRingtoneIndex.value = index;
+    update();
+    playSound(alarmRingtones[index].path);
   }
 
   @override

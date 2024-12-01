@@ -1,48 +1,80 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:Clockify/app/core/utils/constants/colors.dart';
 import 'package:Clockify/app/core/utils/constants/enums/wheel_type.dart';
-import 'package:Clockify/app/global/controller/time_picker_controller.dart';
 import 'package:Clockify/app/global/widgets/time_picker.dart';
 
 class TimePickerView extends StatelessWidget {
-  final String tag;
   final double? fontSize;
   final double? itemExtent;
   final double height;
-  final bool isTimer;
   final List<int>? hours;
   final List<int>? minutes;
   final List<int>? seconds;
-
+  final int selectedHour;
+  final int selectedMinute;
+  final int? selectedSecond;
+  final String? selectedMeridiem;
+  final void Function(int value) onSelectedHourChanged;
+  final void Function(int value) onSelectedMinuteChanged;
+  final void Function(int value)? onSelectedSecondChanged;
+  final void Function(String value)? onSelectedMeridiemChanged;
   const TimePickerView({
     super.key,
     required this.height,
-    this.isTimer = false,
-    required this.tag,
     this.hours,
     this.minutes,
     this.seconds,
     this.fontSize,
     this.itemExtent,
+    required this.selectedHour,
+    required this.selectedMinute,
+    this.selectedSecond,
+    required this.onSelectedHourChanged,
+    required this.onSelectedMinuteChanged,
+    this.onSelectedSecondChanged,
+    this.selectedMeridiem,
+    this.onSelectedMeridiemChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    final timePickerCtrl = Get.find<TimePickerController>(tag: tag);
+    final List<String> meridiemList = ['AM', 'PM'];
+
+    final List<int> hourList = List.generate(12, (i) => i + 1);
+
+    final List<int> minuteList = List.generate(60, (i) => i);
+
+    final List<int> secondList = List.generate(60, (i) => i);
+
+    late FixedExtentScrollController hourController =
+        FixedExtentScrollController(
+            initialItem: hourList.indexOf(selectedHour));
+    late FixedExtentScrollController minuteController =
+        FixedExtentScrollController(
+            initialItem: minuteList.indexOf(selectedMinute));
+    late FixedExtentScrollController secondController =
+        FixedExtentScrollController(
+            initialItem: secondList.isNotEmpty
+                ? secondList.indexOf(selectedSecond!)
+                : 0);
+    late FixedExtentScrollController meridiemController =
+        FixedExtentScrollController(
+            initialItem: meridiemList.isNotEmpty
+                ? meridiemList.indexOf(selectedMeridiem!)
+                : 0);
 
     return Row(
       children: [
         TimePicker(
           height: height,
-          tag: tag,
           flex: 4,
-          wheelType: WheelType.hour,
-          items: hours ?? timePickerCtrl.hourList(),
+          wheelType: WheelType.looping,
+          items: hourList,
           fontSize: fontSize ?? 40,
           itemExtent: itemExtent ?? 50,
-          controller: timePickerCtrl.hourController,
-          onChanged: (value) => timePickerCtrl.selectedHour.value = value,
+          controller: hourController,
+          selectedItem: selectedHour,
+          onSelectedItemChanged: (value) => onSelectedHourChanged(value as int),
         ),
         SizedBox(
           height: height,
@@ -52,14 +84,15 @@ class TimePickerView extends StatelessWidget {
         ),
         TimePicker(
           height: height,
-          tag: tag,
           flex: 4,
           fontSize: fontSize ?? 40,
           itemExtent: itemExtent ?? 50,
-          wheelType: WheelType.minute,
-          items: minutes ?? timePickerCtrl.minuteList(),
-          controller: timePickerCtrl.minuteController,
-          onChanged: (value) => timePickerCtrl.selectedMinute.value = value,
+          wheelType: WheelType.looping,
+          items: minuteList,
+          controller: minuteController,
+          selectedItem: selectedMinute,
+          onSelectedItemChanged: (value) =>
+              onSelectedMinuteChanged(value as int),
         ),
         SizedBox(
           height: height,
@@ -67,32 +100,32 @@ class TimePickerView extends StatelessWidget {
             color: grey.withOpacity(0.15),
           ),
         ),
-        if (isTimer)
+        if (selectedSecond != null && onSelectedSecondChanged != null)
           TimePicker(
             height: height,
-            tag: tag,
             flex: 4,
             fontSize: fontSize ?? 40,
             itemExtent: itemExtent ?? 50,
-            wheelType: WheelType.second,
-            items: timePickerCtrl.secondList(),
-            controller: timePickerCtrl.secondController,
-            onChanged: (value) => timePickerCtrl.selectedSecond.value = value,
-          )
-        else
+            wheelType: WheelType.looping,
+            items: secondList,
+            controller: secondController,
+            selectedItem: selectedSecond!,
+            onSelectedItemChanged: (value) =>
+                onSelectedSecondChanged!(value as int),
+          ),
+        if (selectedMeridiem != null && onSelectedMeridiemChanged != null)
           TimePicker(
             height: height,
-            tag: tag,
             flex: 5,
             fontSize: fontSize ?? 40,
             itemExtent: itemExtent ?? 50,
-            wheelType: WheelType.meridiem,
-            meridiems: timePickerCtrl.meridiemList,
-            controller: timePickerCtrl.meridiemController,
-            onChanged: (value) {
-              timePickerCtrl.selectedMeridiem.value = value;
-            },
-          )
+            wheelType: WheelType.fixed,
+            items: meridiemList,
+            controller: meridiemController,
+            selectedItem: selectedMeridiem!,
+            onSelectedItemChanged: (value) =>
+                onSelectedMeridiemChanged!(value as String),
+          ),
       ],
     );
   }

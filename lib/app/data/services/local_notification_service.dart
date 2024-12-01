@@ -12,7 +12,7 @@ Future<void> rescheduleNotification(
     NotificationResponse notificationResponse, Alarm alarm) async {
   await LocalNotificationService().showNotification(alarm);
   final DateTime now = DateTime.now();
-  final DateTime nextMinute = DateTime(
+  final DateTime snoozedTime = DateTime(
     now.year,
     now.month,
     now.day,
@@ -21,14 +21,9 @@ Future<void> rescheduleNotification(
     0,
     0,
   );
-  final Alarm rescheduleAlarm = Alarm(
-    id: alarm.id! + 10,
-    label: alarm.label,
-    enableVibration: alarm.enableVibration,
-    alarmDateTime: nextMinute,
-    ringtone: alarm.ringtone,
-    isEnabled: alarm.isEnabled,
-    daysOfWeek: alarm.daysOfWeek,
+  final Alarm rescheduleAlarm = alarm.copyWith(
+    id: alarm.id! + 1,
+    alarmDateTime: snoozedTime,
   );
   await LocalNotificationService().scheduleNotification(rescheduleAlarm);
 }
@@ -44,7 +39,7 @@ void handleActionButton(
       log('Action 2 clicked');
       break;
     case 'cancel':
-      await LocalNotificationService().deleteNotification(alarm.id! + 10);
+      await LocalNotificationService().deleteNotification(alarm.id! + 1);
       break;
     default:
       log('Notification tapped');
@@ -53,44 +48,37 @@ void handleActionButton(
 
 void onDidReceiveNotificationResponse(
     NotificationResponse notificationResponse) {
-  final alarmCtrl = Get.put(AlarmController());
-  Alarm alarm = alarmCtrl.alarms[alarmCtrl.alarms.indexWhere((Alarm alarm) {
-    if (alarm.id! != notificationResponse.id!) {
-      return alarm.id! == notificationResponse.id! - 10;
-    } else {
-      return alarm.id! == notificationResponse.id!;
-    }
-  })];
+  final AlarmController alarmCtrl = Get.isRegistered<AlarmController>()
+      ? Get.find<AlarmController>()
+      : Get.put(AlarmController());
+  final Alarm receivedAlarm = alarmCtrl.alarms.firstWhere((alarm) =>
+      alarm.id == notificationResponse.id ||
+      alarm.id! == notificationResponse.id! - 1);
   log('Notification response received: ${notificationResponse.actionId}');
-  handleActionButton(notificationResponse, alarm);
+  handleActionButton(notificationResponse, receivedAlarm);
 }
 
 @pragma('vm:entry-point')
 void onDidReceiveBackgroundNotificationResponse(
     NotificationResponse notificationResponse) async {
   tzi.initializeTimeZones();
-  final alarmCtrl = Get.put(AlarmController());
-  await alarmCtrl.loadAlarms();
-  late Alarm alarm;
-
-  alarm = alarmCtrl.alarms[alarmCtrl.alarms.indexWhere((Alarm alarm) {
-    if (alarm.id! != notificationResponse.id! &&
-        notificationResponse.notificationResponseType ==
-            NotificationResponseType.selectedNotificationAction) {
-      if (alarm.daysOfWeek.isNotEmpty && alarm.daysOfWeek.length != 7) {
-        if (alarm.id! == notificationResponse.id! - DateTime.now().weekday) {
-          return alarm.id! == notificationResponse.id! - DateTime.now().weekday;
-        } else {
-          alarm.id! == notificationResponse.id! - 10;
-        }
+  final AlarmController alarmCtrl = Get.isRegistered<AlarmController>()
+      ? Get.find<AlarmController>()
+      : Get.put<AlarmController>(AlarmController());
+  alarmCtrl.alarms = await alarmCtrl.loadAlarms();
+  final Alarm receivedAlarm = alarmCtrl.alarms.firstWhere(
+    (alarm) {
+      if (alarm.id! != notificationResponse.id! &&
+          notificationResponse.notificationResponseType ==
+              NotificationResponseType.selectedNotificationAction) {
+        return alarm.id == notificationResponse.id! - 1 ||
+            alarm.daysOfWeek.isNotEmpty && alarm.daysOfWeek.length != 7;
+      } else {
+        return alarm.id! == notificationResponse.id!;
       }
-      return alarm.id! == notificationResponse.id! - 10;
-    } else {
-      return alarm.id! == notificationResponse.id!;
-    }
-  })];
-
-  handleActionButton(notificationResponse, alarm);
+    },
+  );
+  handleActionButton(notificationResponse, receivedAlarm);
   log('Background Notification response received: ${notificationResponse.actionId}');
 }
 
@@ -127,9 +115,8 @@ class LocalNotificationService {
     );
   }
 
-  Future<void>? deleteNotification(id) async {
-    return await flutterLocalNotificationsPlugin.cancel(id);
-  }
+  Future<void>? deleteNotification(id) async =>
+      await flutterLocalNotificationsPlugin.cancel(id);
 
   Future<void> showNotification(Alarm alarm) async {
     return flutterLocalNotificationsPlugin.show(
@@ -138,7 +125,7 @@ class LocalNotificationService {
       'Alarm',
       NotificationDetails(
         android: AndroidNotificationDetails(
-          '${alarm.id! + 50}',
+          '${alarm.id! + 10}',
           'InformNotification',
           channelDescription: 'show_notifications',
           importance: Importance.low,
@@ -158,10 +145,10 @@ class LocalNotificationService {
   }
 
   Future<void>? scheduleNotification(Alarm alarmDetails,
-      {Duration? duration}) async {
+      {DateTimeComponents? dateTimeComponent, Duration? duration}) async {
     return await flutterLocalNotificationsPlugin.zonedSchedule(
       alarmDetails.id!,
-      alarmDetails.label.isEmpty ? 'Alarm is ringing' : alarmDetails.label,
+      alarmDetails.label ?? 'Alarm is ringing',
       alarmDetails.alarmDateTime.formatDateTime(formate: 'hh:mm a'),
       alarmDetails.alarmDateTime.isAfter(DateTime.now())
           ? tz.TZDateTime.from(alarmDetails.alarmDateTime, tz.local)
@@ -211,58 +198,7 @@ class LocalNotificationService {
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       androidScheduleMode: AndroidScheduleMode.alarmClock,
-    );
-  }
-
-  Future<void>? scheduleDailyNotification(Alarm alarmDetails) async {
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      alarmDetails.id!,
-      alarmDetails.label == '' ? 'Alarm is ringing' : alarmDetails.label,
-      alarmDetails.alarmDateTime.formatDateTime(formate: 'hh:mm a'),
-      tz.TZDateTime.from(alarmDetails.alarmDateTime, tz.local),
-      NotificationDetails(
-        // Android details
-        android: AndroidNotificationDetails(
-          alarmDetails.id.toString(),
-          'Daily Alarm',
-          channelDescription: "scheduleDailyNotification",
-          importance: Importance.high,
-          priority: Priority.high,
-          enableVibration: alarmDetails.enableVibration,
-          sound:
-              RawResourceAndroidNotificationSound(alarmDetails.ringtone.path),
-          playSound: true,
-          autoCancel: false,
-          ongoing: true,
-          additionalFlags: Int32List.fromList(<int>[4, 64]),
-          audioAttributesUsage: AudioAttributesUsage.alarm,
-          fullScreenIntent: true,
-          timeoutAfter: 60000,
-          actions: [
-            const AndroidNotificationAction(
-              'stop',
-              'Stop',
-              cancelNotification: true,
-            ),
-            const AndroidNotificationAction(
-              'snooze',
-              'Snooze',
-              cancelNotification: true,
-            ),
-          ],
-        ),
-        // iOS details
-        iOS: const DarwinNotificationDetails(
-          sound: 'default.wav',
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        ),
-      ),
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      androidScheduleMode: AndroidScheduleMode.alarmClock,
-      matchDateTimeComponents: DateTimeComponents.time,
+      matchDateTimeComponents: dateTimeComponent,
     );
   }
 
@@ -303,7 +239,6 @@ class LocalNotificationService {
               'snooze',
               'Snooze',
               cancelNotification: true,
-
               // icon: 'ic_snooze',
             ),
           ],

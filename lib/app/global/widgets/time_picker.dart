@@ -1,109 +1,87 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:Clockify/app/core/utils/constants/enums/wheel_type.dart';
-import 'package:Clockify/app/global/controller/time_picker_controller.dart';
+import 'package:flutter/material.dart';
 
 class TimePicker extends StatelessWidget {
   final FixedExtentScrollController controller;
-  final String tag;
   final double height;
-  final List<String> meridiems;
-  final List<int> items;
-  final ValueChanged onChanged;
   final int flex;
-  final WheelType wheelType;
+  final List<dynamic> items;
   final double fontSize;
   final double itemExtent;
+  final dynamic selectedItem;
+  final WheelType wheelType;
+  final void Function(dynamic value) onSelectedItemChanged;
   const TimePicker({
     super.key,
+    this.flex = 1,
     this.items = const [],
     required this.controller,
-    required this.onChanged,
     required this.height,
-    this.meridiems = const [],
-    this.flex = 1,
-    required this.wheelType,
-    required this.tag,
     required this.fontSize,
     required this.itemExtent,
+    required this.selectedItem,
+    required this.onSelectedItemChanged,
+    required this.wheelType,
   });
 
   @override
   Widget build(BuildContext context) {
-    final timePickerCtrl = Get.find<TimePickerController>(tag: tag);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (controller.hasClients) {
-        controller.jumpToItem(timePickerCtrl.getItemIndex(wheelType));
-      }
-    });
-
+    final int selectedItemIndex = items.indexOf(selectedItem);
     return Flexible(
       flex: flex,
-      child: Obx(
-        () => SizedBox(
-          height: height,
-          child: ListWheelScrollView.useDelegate(
-            physics: const FixedExtentScrollPhysics(),
-            controller: controller,
-            diameterRatio: 1.4,
-            itemExtent: itemExtent,
-            onSelectedItemChanged: (index) {
-              timePickerCtrl.changeItemIndex(wheelType, index);
-              onChanged(timePickerCtrl.returnSelectedItem(
-                  wheelType, items, meridiems, index));
-            },
-            childDelegate: wheelType == WheelType.meridiem
-                ? ListWheelChildListDelegate(
-                    children: List.generate(
-                        meridiems.length,
-                        (index) => AnimatedScale(
-                              scale: timePickerCtrl.getItemIndex(wheelType) ==
-                                      index
-                                  ? 1
-                                  : 0.65,
-                              duration: const Duration(milliseconds: 100),
-                              child: Text(
-                                meridiems[index],
-                                style: TextStyle(
-                                  fontSize: 40,
-                                  fontWeight: FontWeight.w500,
-                                  color: timePickerCtrl
-                                              .getItemIndex(wheelType) ==
-                                          index
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(context)
-                                          .colorScheme
-                                          .primary
-                                          .withOpacity(0.4),
-                                ),
-                              ),
-                            )),
-                  )
-                : ListWheelChildLoopingListDelegate(
-                    children: List.generate(
-                      items.length,
-                      (index) => AnimatedScale(
-                          scale: timePickerCtrl.getItemIndex(wheelType) == index
-                              ? 1
-                              : 0.65,
-                          duration: const Duration(milliseconds: 200),
-                          child: Text(
-                            items[index].toString().padLeft(2, '0'),
-                            style: TextStyle(
-                              fontSize: fontSize,
-                              fontWeight: FontWeight.bold,
-                              color: timePickerCtrl.getItemIndex(wheelType) ==
-                                      index
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context)
-                                      .colorScheme
-                                      .primary
-                                      .withOpacity(0.4),
-                            ),
-                          )),
+      child: SizedBox(
+        height: height,
+        child: ListWheelScrollView.useDelegate(
+          physics: const FixedExtentScrollPhysics(),
+          controller: controller,
+          diameterRatio: 1.4,
+          itemExtent: itemExtent,
+          onSelectedItemChanged: (index) => onSelectedItemChanged(items[index]),
+          childDelegate: wheelType == WheelType.fixed
+              ? ListWheelChildListDelegate(
+                  children: List.generate(
+                    items.length,
+                    (index) => AnimatedScale(
+                      scale: selectedItemIndex == index ? 1 : 0.65,
+                      duration: const Duration(milliseconds: 100),
+                      child: Text(
+                        items[index].toString(),
+                        style: TextStyle(
+                          fontSize: 40,
+                          fontWeight: FontWeight.w500,
+                          color: selectedItemIndex == index
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.4),
+                        ),
+                      ),
                     ),
                   ),
-          ),
+                )
+              : ListWheelChildLoopingListDelegate(
+                  children: List.generate(
+                    items.length,
+                    (index) => AnimatedScale(
+                      scale: selectedItemIndex == index ? 1 : 0.65,
+                      duration: const Duration(milliseconds: 200),
+                      child: Text(
+                        items[index].toString().padLeft(2, '0'),
+                        style: TextStyle(
+                          fontSize: fontSize,
+                          fontWeight: FontWeight.bold,
+                          color: selectedItemIndex == index
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.4),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
         ),
       ),
     );

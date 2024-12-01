@@ -1,10 +1,11 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:ui';
 import 'package:Clockify/app/data/services/android_alarm_manager_service.dart';
 import 'package:Clockify/app/modules/alarm/controller/alarm_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:Clockify/app/data/models/alarm_model.dart';
@@ -13,118 +14,114 @@ import 'package:Clockify/app/data/services/local_notification_service.dart';
 @pragma('vm:entry-point')
 void turnOffAlarm(int id, Map<String, dynamic> params) async {
   WidgetsFlutterBinding.ensureInitialized();
-  final alarmCtrl = Get.put(AlarmController());
+  final AlarmController alarmCtrl = Get.isRegistered<AlarmController>()
+      ? Get.find<AlarmController>()
+      : Get.put(AlarmController());
   final Alarm alarmDetails = Alarm.fromJson(params);
-  await alarmCtrl.loadAlarms();
-  int index =
+  alarmCtrl.alarms = await alarmCtrl.loadAlarms();
+  final int index =
       alarmCtrl.alarms.indexWhere((Alarm alarm) => alarm.id == alarmDetails.id);
   await alarmCtrl.toggleSwitch(index, false, rescheduleAlarm: false);
-  await alarmCtrl.loadAlarms();
-  final sendPort = IsolateNameServer.lookupPortByName('alarmUpdatePort');
+  final SendPort? sendPort =
+      IsolateNameServer.lookupPortByName('alarmUpdatePort');
   if (sendPort != null) {
-    sendPort.send(alarmCtrl.alarms.map((a) => a.toJson()).toList());
+    sendPort.send(alarmCtrl.alarms.map((alarm) => alarm.toJson()).toList());
   }
+  alarmCtrl.update();
 }
 
 class AlarmStorageService {
   static Future<File> get localFilePath async {
-    final directory = await getApplicationDocumentsDirectory();
+    final Directory directory = await getApplicationDocumentsDirectory();
     return File('${directory.path}/alarm.json');
   }
 
   static Future<void> saveAlarms(Alarm alarms) async {
-    if (alarms.daysOfWeek.isEmpty) {
-      await AndroidAlarmManagerService.oneShotAt(alarms, turnOffAlarm);
-      LocalNotificationService().scheduleNotification(alarms);
-    } else if (alarms.daysOfWeek.length == 7) {
-      LocalNotificationService().scheduleDailyNotification(alarms);
+    if (alarms.daysOfWeek.isEmpty || alarms.daysOfWeek.length == 7) {
+      LocalNotificationService().scheduleNotification(alarms,
+          dateTimeComponent:
+              alarms.daysOfWeek.length == 7 ? DateTimeComponents.time : null);
+      if (alarms.daysOfWeek.isEmpty) {
+        await AndroidAlarmManagerService.oneShotAt(alarms, turnOffAlarm);
+      }
     } else {
       for (int day in alarms.daysOfWeek) {
         LocalNotificationService().scheduleCustomDayNotification(alarms, day);
       }
     }
-    final file = await localFilePath;
-    List<Alarm> existingAlarms = await loadAlarms();
+    final File file = await localFilePath;
+    final List<Alarm> existingAlarms = await loadAlarms();
     existingAlarms.add(alarms);
-    final alarmsJson = existingAlarms.map((alarm) => alarm.toJson()).toList();
+    final List<Map<String, dynamic>> alarmsJson =
+        existingAlarms.map((Alarm alarm) => alarm.toJson()).toList();
     await file.writeAsString(jsonEncode(alarmsJson));
   }
 
-  static deleteAlarm(List<bool> selectedAlarms) async {
-    final file = await localFilePath;
-    List<Alarm> existingAlarms = await loadAlarms();
-    for (var i = 0; i < selectedAlarms.length;) {
-      existingAlarms.removeWhere((element) {
-        if (selectedAlarms[i]) {
-          LocalNotificationService().deleteNotification(element.id! + 10);
-          if (existingAlarms[i].daysOfWeek.isNotEmpty &&
-              existingAlarms[i].daysOfWeek.length != 7) {
-            for (var day in existingAlarms[i].daysOfWeek) {
+  static Future<void> deleteAlarm(List<bool> selectedAlarms) async {
+    final File file = await localFilePath;
+    final List<Alarm> existingAlarms = await loadAlarms();
+    for (int i = 0; i < selectedAlarms.length;) {
+      existingAlarms.removeWhere(
+        (element) {
+          if (selectedAlarms[i]) {
+            LocalNotificationService().deleteNotification(element.id! + 1);
+            if (existingAlarms[i].daysOfWeek.isEmpty ||
+                existingAlarms[i].daysOfWeek.length == 7) {
               LocalNotificationService()
-                  .deleteNotification(existingAlarms[i].id! + day);
+                  .deleteNotification(existingAlarms[i].id);
+              AndroidAlarmManagerService.deleteOneShot(existingAlarms[i].id!);
+            } else {
+              for (var day in existingAlarms[i].daysOfWeek) {
+                LocalNotificationService()
+                    .deleteNotification(existingAlarms[i].id! + day);
+              }
             }
-          } else if (existingAlarms[i].daysOfWeek.isEmpty) {
-            AndroidAlarmManagerService.deleteOneShot(existingAlarms[i].id!);
-            LocalNotificationService()
-                .deleteNotification(existingAlarms[i].id!);
-          } else {
-            LocalNotificationService()
-                .deleteNotification(existingAlarms[i].id!);
           }
-        }
-        return selectedAlarms[i++];
-      });
+          return selectedAlarms[i++];
+        },
+      );
     }
-    final alarmsJson = existingAlarms.map((alarm) => alarm.toJson()).toList();
+    final List<Map<String, dynamic>> alarmsJson =
+        existingAlarms.map((Alarm alarm) => alarm.toJson()).toList();
     await file.writeAsString(jsonEncode(alarmsJson));
   }
 
   static Future<void> updateAlarm(int index, Alarm updatedAlarm,
       {required bool rescheduleAlarm}) async {
-    final file = await localFilePath;
-    List<Alarm> existingAlarms = await loadAlarms();
-    Alarm alarm = Alarm(
-        id: updatedAlarm.id,
-        label: updatedAlarm.label,
-        enableVibration: updatedAlarm.enableVibration,
+    final File file = await localFilePath;
+    final List<Alarm> existingAlarms = await loadAlarms();
+    final Alarm alarm = updatedAlarm.copyWith(
         alarmDateTime: updatedAlarm.alarmDateTime.isBefore(DateTime.now())
             ? updatedAlarm.alarmDateTime.add(const Duration(days: 1))
-            : updatedAlarm.alarmDateTime,
-        ringtone: updatedAlarm.ringtone,
-        isEnabled: updatedAlarm.isEnabled,
-        daysOfWeek: updatedAlarm.daysOfWeek);
+            : updatedAlarm.alarmDateTime);
     if (rescheduleAlarm) {
-      log('updatedAlarm ${updatedAlarm.alarmDateTime.toIso8601String()}');
-      log('Alarm updated to ${alarm.alarmDateTime.toIso8601String()}');
       if (alarm.isEnabled) {
-        await AndroidAlarmManagerService.deleteOneShot(
-            existingAlarms[index].id!);
-        if (alarm.daysOfWeek.isEmpty) {
+        if (alarm.daysOfWeek.isEmpty || alarm.daysOfWeek.length == 7) {
           await LocalNotificationService()
               .deleteNotification(existingAlarms[index].id!);
-          LocalNotificationService().scheduleNotification(alarm);
-          await AndroidAlarmManagerService.oneShotAt(alarm, turnOffAlarm);
-        } else if (alarm.daysOfWeek.length == 7) {
-          await LocalNotificationService()
-              .deleteNotification(existingAlarms[index].id!);
-          LocalNotificationService().scheduleDailyNotification(alarm);
+          LocalNotificationService().scheduleNotification(alarm,
+              dateTimeComponent: updatedAlarm.daysOfWeek.length == 7
+                  ? DateTimeComponents.time
+                  : null);
+          await AndroidAlarmManagerService.deleteOneShot(
+              existingAlarms[index].id!);
+          if (alarm.daysOfWeek.isEmpty) {
+            await AndroidAlarmManagerService.oneShotAt(alarm, turnOffAlarm);
+          }
         } else {
-          for (var day in existingAlarms[index].daysOfWeek) {
+          for (int day in alarm.daysOfWeek) {
             await LocalNotificationService()
                 .deleteNotification(existingAlarms[index].id! + day);
-          }
-          for (int day in alarm.daysOfWeek) {
             LocalNotificationService()
                 .scheduleCustomDayNotification(alarm, day);
           }
         }
       } else {
-        LocalNotificationService().deleteNotification(alarm.id! + 10);
         if (alarm.daysOfWeek.isEmpty || alarm.daysOfWeek.length == 7) {
           await LocalNotificationService()
               .deleteNotification(existingAlarms[index].id!);
         } else {
-          for (var day in existingAlarms[index].daysOfWeek) {
+          for (int day in existingAlarms[index].daysOfWeek) {
             await LocalNotificationService()
                 .deleteNotification(existingAlarms[index].id! + day);
           }
@@ -133,7 +130,8 @@ class AlarmStorageService {
     }
     existingAlarms.removeAt(index);
     existingAlarms.insert(index, alarm);
-    final alarmsJson = existingAlarms.map((alarm) => alarm.toJson()).toList();
+    final List<Map<String, dynamic>> alarmsJson =
+        existingAlarms.map((Alarm alarm) => alarm.toJson()).toList();
     await file.writeAsString(jsonEncode(alarmsJson));
   }
 

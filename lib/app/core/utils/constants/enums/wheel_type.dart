@@ -1,6 +1,1 @@
-enum WheelType {
-  hour,
-  minute,
-  second,
-  meridiem,
-}
+enum WheelType { looping, fixed }

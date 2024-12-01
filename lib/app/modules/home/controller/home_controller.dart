@@ -14,12 +14,10 @@ class HomeController extends GetxController {
   bool callOnPageChange = true;
   bool editMode = false;
   PageController pageController = PageController(initialPage: 0);
-
-  final alarmCtrl = Get.find<AlarmController>();
-  final clockCtrl = Get.find<ClockController>();
-  final stopwatchCtrl = Get.find<StopwatchController>();
-  final timerCtrl = Get.put(TimerController());
-
+  final AlarmController alarmCtrl = Get.find<AlarmController>();
+  final ClockController clockCtrl = Get.find<ClockController>();
+  final StopwatchController stopwatchCtrl = Get.find<StopwatchController>();
+  final TimerController timerCtrl = Get.put(TimerController());
   FloatingActionButtonLocation get getFloatingButtonLocation =>
       currentPageIndex == 0 || currentPageIndex == 1
           ? FloatingActionButtonLocation.endFloat
@@ -47,7 +45,11 @@ class HomeController extends GetxController {
   void toggleEditMode() {
     editMode = !editMode;
     update();
-    clockCtrl.update();
+    if (currentPageIndex == 0) {
+      clockCtrl.update();
+    } else {
+      alarmCtrl.update();
+    }
   }
 
   /// return the current page title according to index
@@ -97,15 +99,14 @@ class HomeController extends GetxController {
     if (currentPageIndex == 0) {
       clockCtrl.toggleSelectAll();
     } else if (currentPageIndex == 1) {
-      alarmCtrl.markAsAllSelected();
+      alarmCtrl.toggleSelectAll();
     }
     update();
   }
 
-  bool get isAllMarkSelected {
-    return alarmCtrl.selectedAlarms.contains(false) ||
-        clockCtrl.selectedClockCard.contains(false);
-  }
+  bool get isAllMarkSelected => currentPageIndex == 0
+      ? clockCtrl.selectedClockCard.contains(false)
+      : alarmCtrl.selectedAlarms.contains(false);
 
   void onTapDelete() async {
     if (editMode) {
@@ -114,6 +115,7 @@ class HomeController extends GetxController {
         toggleEditMode();
       } else {
         await alarmCtrl.deleteAlarm(alarmCtrl.selectedAlarms);
+        toggleEditMode();
       }
     }
   }

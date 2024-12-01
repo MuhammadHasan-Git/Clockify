@@ -1,22 +1,23 @@
+import 'package:Clockify/app/global/widgets/my_switch.dart';
+import 'package:Clockify/app/global/widgets/time_picker_view.dart';
+import 'package:Clockify/app/modules/alarm/controller/alarm_controller.dart';
+import 'package:Clockify/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:Clockify/app/core/utils/constants/colors.dart';
 import 'package:Clockify/app/core/utils/extensions/extensions.dart';
 import 'package:Clockify/app/data/models/alarm_model.dart';
-import 'package:Clockify/app/global/controller/time_picker_controller.dart';
-import 'package:Clockify/app/global/widgets/my_switch.dart';
-import 'package:Clockify/app/modules/add_alarm/bindings/add_alarm_bindings.dart';
-import 'package:Clockify/app/modules/add_alarm/screen/add_alarm_screen.dart';
-import 'package:Clockify/app/modules/add_alarm/widget/my_button.dart';
-import 'package:Clockify/app/global/widgets/time_picker_view.dart';
-import 'package:Clockify/app/modules/alarm/controller/alarm_controller.dart';
+import 'package:Clockify/app/global/widgets/my_button.dart';
 
 class EditAlarmDialog extends StatefulWidget {
-  final Alarm alarmModel;
-  final int index;
-  const EditAlarmDialog(
-      {super.key, required this.alarmModel, required this.index});
+  final Alarm alarm;
+  final int alarmIndex;
+  const EditAlarmDialog({
+    super.key,
+    required this.alarm,
+    required this.alarmIndex,
+  });
 
   @override
   State<EditAlarmDialog> createState() => _EditAlarmDialogState();
@@ -24,82 +25,67 @@ class EditAlarmDialog extends StatefulWidget {
 
 class _EditAlarmDialogState extends State<EditAlarmDialog> {
   @override
-  void initState() {
-    Get.put(TimePickerController(initialTime: widget.alarmModel.alarmDateTime),
-        tag: 'updateAlarm');
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    Get.delete<TimePickerController>(tag: 'updateAlarm');
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final alarmCtrl = Get.find<AlarmController>();
-    final timePickerCtrl = Get.find<TimePickerController>(tag: 'updateAlarm');
-    alarmCtrl.enabled.value = alarmCtrl.alarms[widget.index].isEnabled;
-
-    return Obx(
-      () => Dialog(
-        insetPadding: EdgeInsets.symmetric(horizontal: Get.width * 0.04),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Opacity(
-                    opacity: alarmCtrl.alarms[widget.index].isEnabled ? 1 : 0.5,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 0),
-                          child: Text(
-                            widget.alarmModel.alarmDateTime
-                                .formatDateTime(formate: 'a'),
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+    return GetBuilder<AlarmController>(
+      builder: (controller) {
+        return Dialog(
+          insetPadding: EdgeInsets.symmetric(horizontal: Get.width * 0.04),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Opacity(
+                      opacity: widget.alarm.isEnabled ? 1 : 0.5,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 0),
+                            child: Text(
+                              widget.alarm.alarmDateTime
+                                  .formatDateTime(formate: 'a'),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
                           ),
-                        ),
-                        Text(
-                          alarmCtrl.getAlarmDays(widget.index),
-                          style: const TextStyle(color: grey),
-                        ),
-                      ],
+                          Text(
+                            controller.getAlarmDays(widget.alarmIndex),
+                            style: const TextStyle(color: grey),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  MySwitch(
-                    value: alarmCtrl.enabled.value,
-                    onChanged: (value) => alarmCtrl.enabled.value = value,
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Divider(
-                color: grey.withOpacity(0.15),
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              const TimePickerView(
-                tag: 'updateAlarm',
-                height: 150,
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  MyButton(
+                    MySwitch(
+                      value: controller.isEnabled,
+                      onChanged: (value) => controller.toggleEditAlarmSwitch(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Divider(color: grey.withOpacity(0.15)),
+                const SizedBox(height: 30),
+                TimePickerView(
+                  height: 150,
+                  selectedHour: controller.selectedHour,
+                  onSelectedHourChanged: (value) =>
+                      controller.onChangeHour(value),
+                  selectedMinute: controller.selectedMinute,
+                  onSelectedMinuteChanged: (value) =>
+                      controller.onChangeMinute(value),
+                  selectedMeridiem: controller.selectedMeridiem,
+                  onSelectedMeridiemChanged: (value) =>
+                      controller.onChangeMeridiem(value),
+                ),
+                const SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    MyButton(
                       text: 'Additional Settings',
                       foregroundColor: Theme.of(context).colorScheme.primary,
                       textStyle: const TextStyle(
@@ -110,51 +96,47 @@ class _EditAlarmDialogState extends State<EditAlarmDialog> {
                       height: 50,
                       onPressed: () {
                         Get.back();
-                        Get.to(
-                            () => AddAlarmScreen(
-                                alarm: Alarm(
-                                    label: widget.alarmModel.label,
-                                    enableVibration:
-                                        widget.alarmModel.enableVibration,
-                                    alarmDateTime:
-                                        timePickerCtrl.getSelectedTime(),
-                                    ringtone: widget.alarmModel.ringtone,
-                                    isEnabled: alarmCtrl.enabled.value,
-                                    daysOfWeek: widget.alarmModel.daysOfWeek),
-                                index: widget.index),
-                            binding: AddAlarmBindings());
-                      }),
-                  SizedBox(width: 10.w),
-                  MyButton(
-                    text: 'Done',
-                    foregroundColor: Theme.of(context).colorScheme.primary,
-                    // backgroundColor: darkBlue,
-                    textStyle: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                        Get.toNamed(
+                          AppRoutes.addAlarm,
+                          arguments: widget.alarm.copyWith(
+                              alarmDateTime: controller.getSelectedTime),
+                          parameters: {'alarmIndex': '${widget.alarmIndex}'},
+                        );
+                      },
                     ),
-                    radius: 50,
-                    height: 50,
-                    onPressed: () {
-                      alarmCtrl.updateAlarm(
-                          updatedAlarm: Alarm(
-                              label: widget.alarmModel.label,
-                              enableVibration:
-                                  widget.alarmModel.enableVibration,
-                              alarmDateTime: timePickerCtrl.getSelectedTime(),
-                              ringtone: widget.alarmModel.ringtone,
-                              isEnabled: alarmCtrl.enabled.value,
-                              daysOfWeek: widget.alarmModel.daysOfWeek),
-                          index: widget.index);
-                      Get.back();
-                    },
-                  ),
-                ],
-              )
-            ],
+                    SizedBox(width: 10.w),
+                    MyButton(
+                      text: 'Done',
+                      foregroundColor: Theme.of(context).colorScheme.primary,
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      radius: 50,
+                      height: 50,
+                      onPressed: () {
+                        controller.updateAlarm(
+                          updatedAlarm: widget.alarm.copyWith(
+                              alarmDateTime: controller.getSelectedTime,
+                              isEnabled: widget.alarm.alarmDateTime
+                                          .isAtSameMomentAs(
+                                              controller.getSelectedTime) ||
+                                      controller.isEnabled !=
+                                          widget.alarm.isEnabled
+                                  ? controller.isEnabled
+                                  : true),
+                          index: widget.alarmIndex,
+                        );
+                        Get.back();
+                      },
+                    ),
+                  ],
+                )
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

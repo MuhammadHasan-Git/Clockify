@@ -31,7 +31,6 @@ void main() async {
     getAutoStartPermission();
     prefs.setBool('isShowAutoStart', true);
   }
-
   runApp(const MyApp());
 }
 
@@ -46,11 +45,11 @@ class MyApp extends StatelessWidget {
       splitScreenMode: true,
       child: GetMaterialApp(
         debugShowCheckedModeBanner: false,
+        initialRoute: AppRoutes.home,
         getPages: AppPages.pages,
         theme: AppTheme.lightTheme(context),
         darkTheme: AppTheme.darkTheme(context),
         themeMode: ThemeMode.system,
-        initialRoute: AppRoutes.home,
       ),
     );
   }

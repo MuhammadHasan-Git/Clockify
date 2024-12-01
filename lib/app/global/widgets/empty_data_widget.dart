@@ -10,24 +10,26 @@ class EmptyDataWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SvgPicture.asset(
-          iconPath,
-          width: 80,
-          height: 80,
-          color: Theme.of(context).colorScheme.tertiary.withOpacity(0.6),
-        ),
-        const SizedBox(height: 10),
-        Text(
-          message,
-          style: TextStyle(
-            color: grey.shade600,
-            fontWeight: FontWeight.w500,
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SvgPicture.asset(
+            iconPath,
+            width: 80,
+            height: 80,
+            color: Theme.of(context).colorScheme.tertiary.withOpacity(0.6),
           ),
-        ),
-      ],
+          const SizedBox(height: 10),
+          Text(
+            message,
+            style: TextStyle(
+              color: grey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
