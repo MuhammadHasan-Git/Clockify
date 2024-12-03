@@ -1,4 +1,4 @@
-import 'package:Clockify/app/global/widgets/time_picker_view.dart';
+import 'package:Clockify/app/components/time_picker_view.dart';
 import 'package:Clockify/app/modules/timer/controller/timer_controller.dart';
 import 'package:Clockify/app/modules/timer/widgets/timer_progress_indicator.dart';
 import 'package:flutter/material.dart';

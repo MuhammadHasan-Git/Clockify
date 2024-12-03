@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:Clockify/app/core/utils/constants/colors.dart';
 import 'package:Clockify/app/core/utils/extensions/extensions.dart';
 import 'package:Clockify/app/modules/alarm/controller/add_alarm_controller.dart';
-import 'package:Clockify/app/global/widgets/my_button.dart';
+import 'package:Clockify/app/components/my_button.dart';
 import 'package:Clockify/app/modules/alarm/widgets/my_check_box.dart';
 
 class DayPickerSheet extends StatelessWidget {

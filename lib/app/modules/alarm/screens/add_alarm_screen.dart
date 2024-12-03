@@ -1,13 +1,13 @@
+import 'package:Clockify/app/components/popup_button.dart';
 import 'package:Clockify/app/core/utils/constants/colors.dart';
-import 'package:Clockify/app/global/widgets/my_switch.dart';
-import 'package:Clockify/app/global/widgets/popup_button.dart';
+import 'package:Clockify/app/components/my_switch.dart';
 import 'package:Clockify/app/modules/alarm/widgets/my_dialog.dart';
 import 'package:Clockify/app/modules/alarm/widgets/settings_tile.dart';
 import 'package:Clockify/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Clockify/app/modules/alarm/controller/add_alarm_controller.dart';
-import 'package:Clockify/app/global/widgets/time_picker_view.dart';
+import 'package:Clockify/app/components/time_picker_view.dart';
 
 class AddAlarmScreen extends StatelessWidget {
   const AddAlarmScreen({super.key});

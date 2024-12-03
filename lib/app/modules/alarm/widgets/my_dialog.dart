@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:Clockify/app/core/utils/constants/colors.dart';
 import 'package:Clockify/app/modules/alarm/controller/add_alarm_controller.dart';
-import 'package:Clockify/app/global/widgets/my_button.dart';
+import 'package:Clockify/app/components/my_button.dart';
 
 class MyDialog extends StatelessWidget {
   const MyDialog({super.key});

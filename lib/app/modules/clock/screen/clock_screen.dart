@@ -1,4 +1,4 @@
-import 'package:Clockify/app/global/widgets/empty_data_widget.dart';
+import 'package:Clockify/app/components/empty_data_widget.dart';
 import 'package:Clockify/app/modules/clock/controller/clock_controller.dart';
 import 'package:Clockify/app/modules/clock/widgets/clock_card.dart';
 import 'package:animated_analog_clock/animated_analog_clock.dart';

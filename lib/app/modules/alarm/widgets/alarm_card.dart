@@ -2,7 +2,7 @@ import 'package:Clockify/app/data/models/alarm_model.dart';
 import 'package:flutter/material.dart';
 import 'package:Clockify/app/core/utils/constants/colors.dart';
 import 'package:Clockify/app/core/utils/extensions/extensions.dart';
-import 'package:Clockify/app/global/widgets/my_switch.dart';
+import 'package:Clockify/app/components/my_switch.dart';
 
 class AlarmCard extends StatelessWidget {
   final Alarm alarm;

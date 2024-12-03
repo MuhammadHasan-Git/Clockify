@@ -1,6 +1,6 @@
 import 'package:Clockify/app/core/utils/constants/enums/float_button_type.dart';
-import 'package:Clockify/app/global/widgets/animated_float_button.dart';
-import 'package:Clockify/app/global/widgets/simple_float_button.dart';
+import 'package:Clockify/app/components/animated_float_button.dart';
+import 'package:Clockify/app/components/simple_float_button.dart';
 import 'package:Clockify/app/modules/alarm/controller/alarm_controller.dart';
 import 'package:Clockify/app/modules/clock/controller/clock_controller.dart';
 import 'package:Clockify/app/modules/stopwatch/controller/stopwatch_controller.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Clockify/app/core/utils/constants/colors.dart';
 import 'package:Clockify/app/core/utils/constants/enums/wheel_type.dart';
-import 'package:Clockify/app/global/widgets/time_picker.dart';
+import 'package:Clockify/app/components/time_picker.dart';
 
 class TimePickerView extends StatelessWidget {
   final double? fontSize;

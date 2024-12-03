@@ -1,4 +1,4 @@
-import 'package:Clockify/app/global/widgets/empty_data_widget.dart';
+import 'package:Clockify/app/components/empty_data_widget.dart';
 import 'package:Clockify/app/modules/alarm/widgets/alarm_card.dart';
 import 'package:flutter/material.dart';
 import 'package:Clockify/app/modules/alarm/controller/alarm_controller.dart';
