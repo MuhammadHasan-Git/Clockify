@@ -13,7 +13,7 @@ class HomeScreen extends GetView<HomeController> {
     return GetBuilder<HomeController>(
       builder: (controller) => Scaffold(
         appBar: AppBar(
-          title: Text(controller.getTitle()),
+          title: Text(controller.getTitle),
           centerTitle: true,
           leading: controller.editMode
               ? IconButton(

@@ -6,63 +6,80 @@ import 'package:Clockify/app/modules/stopwatch/widgets/lap_tile.dart';
 
 class StopwatchController extends GetxController {
   late Stopwatch stopwatch;
-  RxBool isRunning = false.obs;
-  RxBool isPause = false.obs;
-  RxInt milli = 0.obs;
+  bool isRunning = false;
+  bool isPause = false;
+  RxInt milliseconds = 0.obs;
   Timer? _timer;
   final listKey = GlobalKey<AnimatedListState>();
-  RxList<LapModel> lapsList = <LapModel>[].obs;
+  final List<LapModel> lapsList = <LapModel>[];
 
-  @override
-  void onInit() {
-    stopwatch = Stopwatch();
-    _timer = Timer.periodic(const Duration(milliseconds: 1), (timer) {
-      milli.value = stopwatch.elapsedMilliseconds;
-    });
-    super.onInit();
+  void startTimer() {
+    isRunning = true;
+    isPause = !isPause;
+    update();
+    stopwatch.start();
+    _timer = Timer.periodic(
+      const Duration(milliseconds: 1),
+      (timer) => milliseconds.value = stopwatch.elapsedMilliseconds,
+    );
   }
 
-  @override
-  void dispose() {
-    _timer!.cancel();
-    super.dispose();
+  void stopTimer() {
+    stopwatch.stop();
+    isPause = !isPause;
+    update();
   }
 
   void handleStartStop() {
     if (stopwatch.isRunning) {
-      stopwatch.stop();
+      stopTimer();
     } else {
-      isRunning.value = true;
-      stopwatch.start();
+      startTimer();
     }
-    isPause.value = !isPause.value;
+  }
+
+  void handleLapOrReset(bool isPause) {
+    final DateTime time = currentTime;
+    final LapModel lapModel = LapModel(
+      time: time,
+      lapDuration: lapDuration(
+        currentTime: time,
+        previousTime:
+            lapsList.isNotEmpty ? lapsList[lapsList.length - 1].time : null,
+      ),
+    );
+    if (isPause) {
+      lap(lapModel);
+    } else {
+      reset(lapModel);
+    }
   }
 
   /// reset stopwatch
   void reset(LapModel lapModel) {
+    stopwatch.reset();
     listKey.currentState?.removeAllItems(
         (context, animation) => LapTile(
-              lapmodel: lapModel,
+              lapModel: lapModel,
               animationCtrl: animation,
               index: 0,
             ),
         duration: const Duration(microseconds: 1));
-    stopwatch.reset();
-    isRunning.value = false;
     lapsList.clear();
+    isRunning = false;
+    update();
   }
 
   /// add lap
   void lap(LapModel lapModel) {
-    final int index = lapsList.length;
-    lapsList.insert(index, lapModel);
-    listKey.currentState?.insertItem(index);
+    lapsList.insert(0, lapModel);
+    listKey.currentState?.insertItem(0);
+    update();
   }
 
-  /// return current stopatch time
-  DateTime currentTime() {
-    return DateTime.fromMillisecondsSinceEpoch(milli.value, isUtc: true);
-  }
+  /// getter for stopwatch time
+  DateTime get currentTime =>
+      DateTime.fromMillisecondsSinceEpoch(milliseconds.value, isUtc: true);
 
   /// return duration between two laps
   Duration? lapDuration(
@@ -73,5 +90,17 @@ class StopwatchController extends GetxController {
     } else {
       return null;
     }
+  }
+
+  @override
+  void onInit() {
+    stopwatch = Stopwatch();
+    super.onInit();
+  }
+
+  @override
+  void dispose() {
+    _timer!.cancel();
+    super.dispose();
   }
 }

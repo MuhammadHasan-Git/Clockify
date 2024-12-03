@@ -4,6 +4,6 @@ import 'package:Clockify/app/modules/timer/controller/timer_controller.dart';
 class TimerBindings implements Bindings {
   @override
   void dependencies() {
-    Get.put(() => TimerController());
+    Get.lazyPut(() => TimerController());
   }
 }

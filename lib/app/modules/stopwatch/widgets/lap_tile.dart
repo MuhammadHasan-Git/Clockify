@@ -5,13 +5,14 @@ import 'package:Clockify/app/data/models/lap_model.dart';
 
 class LapTile extends StatelessWidget {
   final int index;
-  final LapModel lapmodel;
+  final LapModel lapModel;
   final Animation<double> animationCtrl;
-  const LapTile(
-      {super.key,
-      required this.lapmodel,
-      required this.index,
-      required this.animationCtrl});
+  const LapTile({
+    super.key,
+    required this.lapModel,
+    required this.index,
+    required this.animationCtrl,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +36,7 @@ class LapTile extends StatelessWidget {
                 ),
               ),
               Text(
-                '+${lapmodel.lapDuration?.formatDuration() ?? lapmodel.time.formatDateTime(formate: 'hh:mm:ss.SS', hideHour: true)}',
+                '+${lapModel.lapDuration?.formatDuration() ?? lapModel.time.formatDateTime(formate: 'hh:mm:ss.SS', hideHour: true)}',
                 style: const TextStyle(
                   fontFamily: 'Inconsolata',
                   color: grey,
@@ -44,7 +45,7 @@ class LapTile extends StatelessWidget {
                 ),
               ),
               Text(
-                lapmodel.time
+                lapModel.time
                     .formatDateTime(formate: 'hh:mm:ss.SS', hideHour: true),
                 style: const TextStyle(
                   fontFamily: 'Inconsolata',

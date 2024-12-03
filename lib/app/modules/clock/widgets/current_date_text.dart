@@ -15,7 +15,6 @@ class CurrentDateText extends StatelessWidget {
         style: TextStyle(
           color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
           fontWeight: FontWeight.w500,
-          fontFamily: 'Inconsolata',
         ),
       ),
     );

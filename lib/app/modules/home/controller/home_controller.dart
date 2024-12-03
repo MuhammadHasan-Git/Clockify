@@ -16,8 +16,7 @@ class HomeController extends GetxController {
   PageController pageController = PageController(initialPage: 0);
   final AlarmController alarmCtrl = Get.find<AlarmController>();
   final ClockController clockCtrl = Get.find<ClockController>();
-  final StopwatchController stopwatchCtrl = Get.find<StopwatchController>();
-  final TimerController timerCtrl = Get.put(TimerController());
+
   FloatingActionButtonLocation get getFloatingButtonLocation =>
       currentPageIndex == 0 || currentPageIndex == 1
           ? FloatingActionButtonLocation.endFloat
@@ -79,16 +78,26 @@ class HomeController extends GetxController {
           onPressed: () => Get.toNamed(AppRoutes.addAlarm),
         );
       case 2:
-        return AnimatedFloatButton(
-          floatButtonType: FloatButtonType.stopwatch,
-          isRunning: stopwatchCtrl.isRunning,
-          isPause: stopwatchCtrl.isPause,
+        return GetBuilder<StopwatchController>(
+          autoRemove: false,
+          builder: (controller) => AnimatedFloatButton(
+            floatButtonType: FloatButtonType.stopwatch,
+            isRunning: controller.isRunning,
+            isPause: controller.isPause,
+            onTapBtnOne: () => controller.handleLapOrReset(controller.isPause),
+            onTapBtnTwo: () => controller.handleStartStop(),
+          ),
         );
       case 3:
-        return AnimatedFloatButton(
-          floatButtonType: FloatButtonType.timer,
-          isRunning: timerCtrl.isRunning,
-          isPause: timerCtrl.isPause,
+        return GetBuilder<TimerController>(
+          autoRemove: false,
+          builder: (controller) => AnimatedFloatButton(
+            floatButtonType: FloatButtonType.timer,
+            isRunning: controller.isRunning,
+            isPause: controller.isPaused,
+            onTapBtnOne: () => controller.restTimer(),
+            onTapBtnTwo: () => controller.handleStartStop(),
+          ),
         );
       default:
         return const SizedBox.shrink();
@@ -101,7 +110,6 @@ class HomeController extends GetxController {
     } else if (currentPageIndex == 1) {
       alarmCtrl.toggleSelectAll();
     }
-    update();
   }
 
   bool get isAllMarkSelected => currentPageIndex == 0
@@ -120,7 +128,7 @@ class HomeController extends GetxController {
     }
   }
 
-  String getTitle() {
+  String get getTitle {
     if (editMode && currentPageIndex == 1) {
       return '${alarmCtrl.selectedAlarms.where((item) => item).length} item selected';
     } else if (editMode && currentPageIndex == 0) {

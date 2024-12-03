@@ -1,36 +1,33 @@
+import 'package:Clockify/app/data/models/lap_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
-import 'package:Clockify/app/modules/stopwatch/controller/stopwatch_controller.dart';
 import 'package:Clockify/app/modules/stopwatch/widgets/lap_tile.dart';
 
 class LapsList extends StatelessWidget {
-  const LapsList({super.key});
+  final List<LapModel> laps;
+  final GlobalKey<AnimatedListState> listKey;
+  const LapsList({super.key, required this.laps, required this.listKey});
 
   @override
   Widget build(BuildContext context) {
-    final stopwatchCtrl = Get.find<StopwatchController>();
-
-    return Obx(
-      () => AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        height: stopwatchCtrl.lapsList.isEmpty ? 0 : 300.h,
-        width: double.infinity,
-        child: AnimatedList(
-          initialItemCount: stopwatchCtrl.lapsList.length,
-          shrinkWrap: true,
-          key: stopwatchCtrl.listKey,
-          itemBuilder:
-              (BuildContext context, int index, Animation<double> animation) {
-            // index for reverse list
-            final reversedIndex = stopwatchCtrl.lapsList.length - 1 - index;
-            return LapTile(
-              lapmodel: stopwatchCtrl.lapsList[reversedIndex],
-              index: reversedIndex + 1,
-              animationCtrl: animation,
-            );
-          },
-        ),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      height: laps.isEmpty ? 0 : 300.h,
+      width: double.infinity,
+      child: AnimatedList(
+        initialItemCount: laps.length,
+        shrinkWrap: true,
+        key: listKey,
+        itemBuilder:
+            (BuildContext context, int index, Animation<double> animation) {
+          // index for reverse list
+          final reversedIndex = laps.length - 1 - index;
+          return LapTile(
+            lapModel: laps[reversedIndex],
+            index: reversedIndex + 1,
+            animationCtrl: animation,
+          );
+        },
       ),
     );
   }

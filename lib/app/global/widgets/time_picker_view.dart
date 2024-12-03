@@ -48,15 +48,20 @@ class TimePickerView extends StatelessWidget {
 
     late FixedExtentScrollController hourController =
         FixedExtentScrollController(
-            initialItem: hourList.indexOf(selectedHour));
+      initialItem: hours == null
+          ? hourList.indexOf(selectedHour)
+          : hours!.indexOf(selectedHour),
+    );
     late FixedExtentScrollController minuteController =
         FixedExtentScrollController(
-            initialItem: minuteList.indexOf(selectedMinute));
+            initialItem: minutes == null
+                ? minuteList.indexOf(selectedMinute)
+                : minutes!.indexOf(selectedMinute));
     late FixedExtentScrollController secondController =
         FixedExtentScrollController(
-            initialItem: secondList.isNotEmpty
+            initialItem: seconds == null
                 ? secondList.indexOf(selectedSecond!)
-                : 0);
+                : seconds!.indexOf(selectedSecond ?? 0));
     late FixedExtentScrollController meridiemController =
         FixedExtentScrollController(
             initialItem: meridiemList.isNotEmpty
@@ -69,7 +74,7 @@ class TimePickerView extends StatelessWidget {
           height: height,
           flex: 4,
           wheelType: WheelType.looping,
-          items: hourList,
+          items: hours ?? hourList,
           fontSize: fontSize ?? 40,
           itemExtent: itemExtent ?? 50,
           controller: hourController,
@@ -88,7 +93,7 @@ class TimePickerView extends StatelessWidget {
           fontSize: fontSize ?? 40,
           itemExtent: itemExtent ?? 50,
           wheelType: WheelType.looping,
-          items: minuteList,
+          items: minutes ?? minuteList,
           controller: minuteController,
           selectedItem: selectedMinute,
           onSelectedItemChanged: (value) =>
@@ -107,7 +112,7 @@ class TimePickerView extends StatelessWidget {
             fontSize: fontSize ?? 40,
             itemExtent: itemExtent ?? 50,
             wheelType: WheelType.looping,
-            items: secondList,
+            items: seconds ?? secondList,
             controller: secondController,
             selectedItem: selectedSecond!,
             onSelectedItemChanged: (value) =>

@@ -61,25 +61,27 @@ void onDidReceiveNotificationResponse(
 @pragma('vm:entry-point')
 void onDidReceiveBackgroundNotificationResponse(
     NotificationResponse notificationResponse) async {
-  tzi.initializeTimeZones();
-  final AlarmController alarmCtrl = Get.isRegistered<AlarmController>()
-      ? Get.find<AlarmController>()
-      : Get.put<AlarmController>(AlarmController());
-  alarmCtrl.alarms = await alarmCtrl.loadAlarms();
-  final Alarm receivedAlarm = alarmCtrl.alarms.firstWhere(
-    (alarm) {
-      if (alarm.id! != notificationResponse.id! &&
-          notificationResponse.notificationResponseType ==
-              NotificationResponseType.selectedNotificationAction) {
-        return alarm.id == notificationResponse.id! - 1 ||
-            alarm.daysOfWeek.isNotEmpty && alarm.daysOfWeek.length != 7;
-      } else {
-        return alarm.id! == notificationResponse.id!;
-      }
-    },
-  );
-  handleActionButton(notificationResponse, receivedAlarm);
-  log('Background Notification response received: ${notificationResponse.actionId}');
+  if (notificationResponse.actionId != 'silence') {
+    tzi.initializeTimeZones();
+    final AlarmController alarmCtrl = Get.isRegistered<AlarmController>()
+        ? Get.find<AlarmController>()
+        : Get.put<AlarmController>(AlarmController());
+    alarmCtrl.alarms = await alarmCtrl.loadAlarms();
+    final Alarm receivedAlarm = alarmCtrl.alarms.firstWhere(
+      (alarm) {
+        if (alarm.id! != notificationResponse.id! &&
+            notificationResponse.notificationResponseType ==
+                NotificationResponseType.selectedNotificationAction) {
+          return alarm.id == notificationResponse.id! - 1 ||
+              alarm.daysOfWeek.isNotEmpty && alarm.daysOfWeek.length != 7;
+        } else {
+          return alarm.id! == notificationResponse.id!;
+        }
+      },
+    );
+    handleActionButton(notificationResponse, receivedAlarm);
+    log('Background Notification response received: ${notificationResponse.actionId}');
+  }
 }
 
 class LocalNotificationService {
@@ -117,6 +119,38 @@ class LocalNotificationService {
 
   Future<void>? deleteNotification(id) async =>
       await flutterLocalNotificationsPlugin.cancel(id);
+  int get generateUID => DateTime.now().microsecondsSinceEpoch % 100000;
+
+  Future<void> timesUpNotification({required String body}) async {
+    return flutterLocalNotificationsPlugin.show(
+      generateUID,
+      'Time\'s up!',
+      body,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          'timer_notification_channel',
+          'Timer Notification',
+          channelDescription: 'Notifications for timer events.',
+          importance: Importance.high,
+          priority: Priority.high,
+          fullScreenIntent: true,
+          playSound: true,
+          autoCancel: false,
+          ongoing: true,
+          sound: const RawResourceAndroidNotificationSound('timer_up'),
+          additionalFlags: Int32List.fromList(<int>[4, 64]),
+          timeoutAfter: 60000,
+          actions: const [
+            AndroidNotificationAction(
+              'silence',
+              'Silence',
+              cancelNotification: true,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Future<void> showNotification(Alarm alarm) async {
     return flutterLocalNotificationsPlugin.show(
