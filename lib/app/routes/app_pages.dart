@@ -28,18 +28,25 @@ class AppPages {
     GetPage(
       name: AppRoutes.alarmRingtone,
       page: () => const RingtoneScreen(),
+      transition: Transition.downToUp,
+      showCupertinoParallax: false,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: AppRoutes.timezone,
       page: () => const TimeZoneScreen(),
       binding: TimezoneBindings(),
-      fullscreenDialog: true,
+      transition: Transition.rightToLeft,
+      showCupertinoParallax: false,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: AppRoutes.addAlarm,
       page: () => const AddAlarmScreen(),
       binding: AddAlarmBindings(),
-      fullscreenDialog: true,
+      transition: Transition.rightToLeft,
+      showCupertinoParallax: false,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
   ];
 }
