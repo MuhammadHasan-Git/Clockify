@@ -30,15 +30,15 @@ class ClockScreen extends StatelessWidget {
                 ),
                 const DigitalClock(),
                 const CurrentDateText(),
-                const SizedBox(height: 30),
+                if (controller.clockModels.isNotEmpty)
+                  const SizedBox(height: 30),
+                if (controller.clockModels.isEmpty)
+                  SizedBox(height: Get.height / 2 * 0.25),
                 Visibility(
                   visible: controller.clockModels.isNotEmpty,
-                  replacement: const Padding(
-                    padding: EdgeInsets.only(top: 20),
-                    child: EmptyDataWidget(
-                      message: 'No clocks here',
-                      iconPath: 'assets/icons/location.svg',
-                    ),
+                  replacement: const EmptyDataWidget(
+                    message: 'No clocks here',
+                    iconPath: 'assets/icons/location.svg',
                   ),
                   child: ListView.builder(
                     itemCount: controller.clockModels.length,
