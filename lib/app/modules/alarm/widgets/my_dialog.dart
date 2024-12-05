@@ -35,12 +35,11 @@ class MyDialog extends StatelessWidget {
                 floatingLabelBehavior: FloatingLabelBehavior.never,
                 hintText: 'Enter label',
                 filled: true,
-                fillColor:
-                    Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                fillColor: Theme.of(context).colorScheme.surfaceContainer,
                 hintStyle: TextStyle(
-                    fontSize: 18,
-                    color:
-                        Theme.of(context).colorScheme.primary.withOpacity(0.3)),
+                  fontSize: 18,
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                ),
                 contentPadding:
                     const EdgeInsets.symmetric(vertical: 15, horizontal: 18),
                 focusedBorder: OutlineInputBorder(

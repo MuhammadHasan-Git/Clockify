@@ -48,8 +48,9 @@ class TimerProgressIndicator extends StatelessWidget {
                   return Text(
                     formatTime(remainingSeconds),
                     style: const TextStyle(
-                      fontSize: 40,
+                      fontSize: 48,
                       fontWeight: FontWeight.bold,
+                      fontFamily: 'Inconsolata',
                     ),
                   );
                 },

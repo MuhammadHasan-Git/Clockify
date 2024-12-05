@@ -59,6 +59,7 @@ class AppTheme {
         colorScheme: ColorScheme.dark(
           brightness: Brightness.dark,
           surface: Colors.white.withOpacity(0.14),
+          surfaceContainer: const Color(0xff242526),
           surfaceTint: black,
           onSurface: white,
           primary: white,
@@ -75,8 +76,8 @@ class AppTheme {
             TextStyle(color: grey, fontWeight: FontWeight.w500),
           ),
         ),
-        floatingActionButtonTheme: FloatingActionButtonThemeData(
-          backgroundColor: Colors.grey.shade900,
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: Color(0xff242526),
           foregroundColor: darkBlue,
           iconSize: 30,
         ),
@@ -98,7 +99,7 @@ class AppTheme {
           ),
         ),
         popupMenuTheme: PopupMenuThemeData(
-          color: const Color(0xff101111),
+          color: const Color(0xff242526),
           surfaceTintColor: black,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),

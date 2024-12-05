@@ -194,7 +194,7 @@ class AddAlarmScreen extends StatelessWidget {
                         builder: (context) => Dialog(
                           alignment: Alignment.bottomCenter,
                           backgroundColor:
-                              Theme.of(context).colorScheme.secondary,
+                              Theme.of(context).colorScheme.surfaceContainer,
                           insetPadding: EdgeInsets.symmetric(
                               horizontal: Get.width * 0.03, vertical: 15),
                           child: const MyDialog(),

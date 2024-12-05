@@ -17,7 +17,7 @@ class CustomTextFormField extends StatelessWidget {
       controller: timezoneCtrl.searchController,
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.grey.withOpacity(0.15),
+        fillColor: Theme.of(context).colorScheme.surfaceContainer,
         hintText: 'Search for city',
         prefixIcon: Icon(
           Icons.search,

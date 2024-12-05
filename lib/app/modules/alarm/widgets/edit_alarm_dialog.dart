@@ -29,6 +29,7 @@ class _EditAlarmDialogState extends State<EditAlarmDialog> {
     return GetBuilder<AlarmController>(
       builder: (controller) {
         return Dialog(
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
           insetPadding: EdgeInsets.symmetric(horizontal: Get.width * 0.04),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),

@@ -20,7 +20,7 @@ class LapTile extends StatelessWidget {
       sizeFactor: animationCtrl,
       child: Card(
         margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-        color: Theme.of(context).cardColor,
+        color: Theme.of(context).colorScheme.surfaceContainer,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
           child: Row(
