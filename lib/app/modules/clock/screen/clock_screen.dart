@@ -22,10 +22,17 @@ class ClockScreen extends StatelessWidget {
               children: [
                 Align(
                   alignment: Alignment.topCenter,
-                  child: AnimatedAnalogClock(
-                    size: MediaQuery.of(context).size.height / 4,
-                    hourDashColor: Theme.of(context).colorScheme.primary,
-                    dialType: DialType.dashes,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: AnimatedAnalogClock(
+                      size: MediaQuery.of(context).size.height / 4.4,
+                      hourDashColor: Theme.of(context).colorScheme.primary,
+                      dialType: DialType.numbers,
+                      numberColor: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
                 ),
                 const DigitalClock(),
