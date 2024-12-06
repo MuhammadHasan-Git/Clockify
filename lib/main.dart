@@ -1,10 +1,11 @@
 import 'dart:ui';
 import 'package:Clockify/app/core/utils/theme/theme.dart';
 import 'package:Clockify/app/data/services/local_notification_service.dart';
+import 'package:Clockify/app/data/services/shared_preferences_service.dart';
+import 'package:Clockify/app/data/services/theme_preferences.dart';
 import 'package:Clockify/app/routes/app_pages.dart';
 import 'package:Clockify/app/routes/app_routes.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -16,7 +17,7 @@ void main() async {
   await AndroidAlarmManager.initialize();
   await LocalNotificationService().initNotification();
   IsolateNameServer.removePortNameMapping('alarmUpdatePort');
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  await SharedPreferencesService.init();
   bool hasExactAlarmPermission = await Permission.scheduleExactAlarm.isDenied;
   bool hasNotificationPermission = await Permission.notification.isDenied;
 
@@ -26,10 +27,10 @@ void main() async {
   if (hasExactAlarmPermission) {
     await Permission.scheduleExactAlarm.request();
   }
-  if (prefs.getBool('isShowAutoStart') == null &&
+  if (SharedPreferencesService.getBool('isShowAutoStart') == null &&
       await isAutoStartAvailable == true) {
     getAutoStartPermission();
-    prefs.setBool('isShowAutoStart', true);
+    SharedPreferencesService.saveBool('isShowAutoStart', true);
   }
   runApp(const MyApp());
 }
@@ -49,7 +50,7 @@ class MyApp extends StatelessWidget {
         getPages: AppPages.pages,
         theme: AppTheme.lightTheme(context),
         darkTheme: AppTheme.darkTheme(context),
-        themeMode: ThemeMode.system,
+        themeMode: ThemePreferences.themeMode,
       ),
     );
   }

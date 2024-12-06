@@ -1,6 +1,8 @@
 import 'package:Clockify/app/core/utils/constants/enums/float_button_type.dart';
 import 'package:Clockify/app/components/animated_float_button.dart';
 import 'package:Clockify/app/components/simple_float_button.dart';
+import 'package:Clockify/app/data/services/shared_preferences_service.dart';
+import 'package:Clockify/app/data/services/theme_preferences.dart';
 import 'package:Clockify/app/modules/alarm/controller/alarm_controller.dart';
 import 'package:Clockify/app/modules/clock/controller/clock_controller.dart';
 import 'package:Clockify/app/modules/stopwatch/controller/stopwatch_controller.dart';
@@ -13,6 +15,7 @@ class HomeController extends GetxController {
   int currentPageIndex = 0;
   bool callOnPageChange = true;
   bool editMode = false;
+  bool isDark = ThemePreferences.isDark;
   PageController pageController = PageController(initialPage: 0);
   final AlarmController alarmCtrl = Get.find<AlarmController>();
   final ClockController clockCtrl = Get.find<ClockController>();
@@ -135,5 +138,17 @@ class HomeController extends GetxController {
       return '${clockCtrl.selectedClockCard.where((item) => item).length} item selected';
     }
     return getCurrentPageTitle;
+  }
+
+  IconData get getThemeIcon =>
+      isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded;
+
+  ThemeMode get getThemeMode => isDark ? ThemeMode.dark : ThemeMode.light;
+
+  void toggleTheme() {
+    isDark = !isDark;
+    update();
+    Get.changeThemeMode(getThemeMode);
+    SharedPreferencesService.saveBool('isDark', isDark);
   }
 }

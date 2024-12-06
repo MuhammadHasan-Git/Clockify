@@ -33,8 +33,8 @@ class HomeScreen extends GetView<HomeController> {
                     ),
                   )
                 : IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.more_vert),
+                    onPressed: () => controller.toggleTheme(),
+                    icon: Icon(controller.getThemeIcon),
                   )
           ],
         ),
