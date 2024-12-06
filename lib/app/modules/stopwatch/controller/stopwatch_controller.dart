@@ -72,7 +72,7 @@ class StopwatchController extends GetxController {
 
   /// add lap
   void lap(LapModel lapModel) {
-    lapsList.insert(0, lapModel);
+    lapsList.insert(lapsList.length, lapModel);
     listKey.currentState?.insertItem(0);
     update();
   }
