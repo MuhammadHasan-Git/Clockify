@@ -113,6 +113,7 @@ class HomeController extends GetxController {
     } else if (currentPageIndex == 1) {
       alarmCtrl.toggleSelectAll();
     }
+    update();
   }
 
   bool get isAllMarkSelected => currentPageIndex == 0
@@ -120,7 +121,8 @@ class HomeController extends GetxController {
       : alarmCtrl.selectedAlarms.contains(false);
 
   void onTapDelete() async {
-    if (editMode) {
+    if (editMode && alarmCtrl.selectedAlarms.contains(true) ||
+        clockCtrl.selectedClockCard.contains(true)) {
       if (currentPageIndex == 0) {
         await clockCtrl.deleteClockCard(clockCtrl.selectedClockCard);
         toggleEditMode();
