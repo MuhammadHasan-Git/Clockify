@@ -68,7 +68,7 @@ Clockify is a fully functional alarm app designed to handle your time management
 ---
 
 ## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/MuhammadHasan-Git/Clockify/blob/main/LICENSE) file for details.
 
 ---
 
